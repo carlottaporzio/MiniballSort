@@ -221,6 +221,11 @@ void MiniballHistogrammer::MakeHists() {
 
 		}
 
+		hname = "gE_vs_costhetagamma";
+		htitle = "Gamma-ray energy versus cos(#theta) of angle between gamma-ray and beam axis;Energy [keV];cos(#theta_#gamma)";
+		gE_vs_costhetagamma = new TH2F( hname.data(), htitle.data(), GBIN, GMIN, GMAX, 100, -1.0, 1.0 );
+		histlist->Add(gE_vs_costhetagamma);
+
 		hname = "gE_singles_ebis";
 		htitle = "Gamma-ray energy singles EBIS on-off;Energy [keV];Counts per 0.5 keV";
 		gE_singles_ebis = new TH1F( hname.data(), htitle.data(), GBIN, GMIN, GMAX );
@@ -1156,6 +1161,11 @@ void MiniballHistogrammer::MakeHists() {
 		htitle = "Gamma-ray energy with addback in prompt coincide with any particle;Energy [keV];Counts per 0.5 keV";
 		aE_prompt = new TH1F( hname.data(), htitle.data(), GBIN, GMIN, GMAX );
 		histlist->Add(aE_prompt);
+
+		hname = "aE_vs_costhetagamma";
+		htitle = "Gamma-ray energyi with addback versus cos(#theta) of angle between gamma-ray and beam axis;Energy [keV];cos(#theta_#gamma)";
+		aE_vs_costhetagamma = new TH2F( hname.data(), htitle.data(), GBIN, GMIN, GMAX, 100, -1.0, 1.0 );
+		histlist->Add(aE_vs_costhetagamma);
 
 		hname = "aE_prompt_1p";
 		htitle = "Gamma-ray energy with addback in prompt coincide with just 1 particle;Energy [keV];Counts per 0.5 keV";
@@ -3416,6 +3426,9 @@ unsigned long MiniballHistogrammer::FillHists() {
 				// Singles - Doppler corrected
 				gE_singles_dc->Fill( react->DopplerCorrection( gamma_evt, react->GetBeam()->GetBeta(), 0, 0 ) );
 
+				// Singles vs CosTheta of angle between gamma ray and beam axis
+				gE_vs_costhetagamma->Fill( gamma_energy, react->CosThetaGamma( gamma_evt ) );
+
 				// EBIS time
 				ebis_td_gamma->Fill( (double)gamma_evt->GetTime() - (double)read_evts->GetEBIS() );
 
@@ -3550,6 +3563,9 @@ unsigned long MiniballHistogrammer::FillHists() {
 
 				// Singles - Doppler corrected
 				aE_singles_dc->Fill( react->DopplerCorrection( gamma_ab_evt, react->GetBeam()->GetBeta(), 0, 0 ) );
+
+				// Singles vs CosTheta of angle between gamma ray and beam axis
+				aE_vs_costhetagamma->Fill( gamma_energy, react->CosThetaGamma( gamma_ab_evt ) );
 
 				// Check for events in the EBIS on-beam window
 				if( OnBeam( gamma_ab_evt ) ){

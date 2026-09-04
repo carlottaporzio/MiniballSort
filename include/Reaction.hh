@@ -390,6 +390,7 @@ public:
 	double DopplerCorrection( std::shared_ptr<GammaRayEvt> g, bool ejectile );
 	double DopplerCorrection( std::shared_ptr<SpedeEvt> s, bool ejectile );
 	double CosTheta( std::shared_ptr<GammaRayEvt> g, bool ejectile );
+	double CosThetaGamma( std::shared_ptr<GammaRayEvt> g );
 	double CosTheta( std::shared_ptr<SpedeEvt> s, bool ejectile );
 
 

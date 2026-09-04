@@ -327,8 +327,10 @@ private:
 	// Gamma-rays with and without addback
 	TH1F *gE_singles = nullptr, *gE_singles_ebis = nullptr;
 	TH1F *gE_singles_ebis_on = nullptr, *gE_singles_ebis_off = nullptr;
+	TH2F *gE_vs_costhetagamma = nullptr;
 	TH1F *aE_singles = nullptr, *aE_singles_ebis = nullptr;
 	TH1F *aE_singles_ebis_on = nullptr, *aE_singles_ebis_off = nullptr;
+	TH2F *aE_vs_costhetagamma = nullptr;
 	TH1F *gE_singles_dc = nullptr, *gE_singles_dc_ebis = nullptr;
 	TH1F *aE_singles_dc = nullptr, *aE_singles_dc_ebis = nullptr;
 	TH2F *gE_singles_vs_crystal = nullptr;

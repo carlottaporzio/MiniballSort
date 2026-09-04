@@ -703,6 +703,23 @@ double MiniballReaction::CosTheta( std::shared_ptr<GammaRayEvt> g, bool ejectile
 	
 }
 
+double MiniballReaction::CosThetaGamma( std::shared_ptr<GammaRayEvt> g ) {
+
+	/// Returns the CosTheta angle between gamma ray and beam axis.
+	/// @param ejectile true for and to the ejectile or false for recoil
+	TVector3 gvec = mb_geo[g->GetCluster()].GetSegVector( g->GetCrystal(), g->GetSegment() );
+	
+	// Apply the X and Y offsets directly to the TVector3 input
+	// We move Miniball opposite to the target, which replicates the same
+	// geometrical shift that is observed with respect to the beam
+	// z-offset is already applied to the vector when the geometry is setup
+	gvec.SetX( gvec.X() - x_offset );
+	gvec.SetY( gvec.Y() - y_offset );
+	
+	return gvec.CosTheta();
+	
+}
+
 double MiniballReaction::CosTheta( std::shared_ptr<SpedeEvt> s, bool ejectile ) {
 
 	/// Returns the CosTheta angle between particle and electron.
