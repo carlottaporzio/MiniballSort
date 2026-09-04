@@ -295,6 +295,11 @@ void MiniballHistogrammer::MakeHists() {
 
 		}
 
+		hname = "aE_vs_costhetagamma";
+		htitle = "Gamma-ray energyi with addback versus cos(#theta) of angle between gamma-ray and beam axis;Energy [keV];cos(#theta_#gamma)";
+		aE_vs_costhetagamma = new TH2F( hname.data(), htitle.data(), GBIN, GMIN, GMAX, 100, -1.0, 1.0 );
+		histlist->Add(aE_vs_costhetagamma);
+
 		hname = "aE_singles_ebis";
 		htitle = "Gamma-ray energy with addback singles EBIS on-off;Energy [keV];Counts per 0.5 keV";
 		aE_singles_ebis = new TH1F( hname.data(), htitle.data(), GBIN, GMIN, GMAX );
@@ -1161,11 +1166,6 @@ void MiniballHistogrammer::MakeHists() {
 		htitle = "Gamma-ray energy with addback in prompt coincide with any particle;Energy [keV];Counts per 0.5 keV";
 		aE_prompt = new TH1F( hname.data(), htitle.data(), GBIN, GMIN, GMAX );
 		histlist->Add(aE_prompt);
-
-		hname = "aE_vs_costhetagamma";
-		htitle = "Gamma-ray energyi with addback versus cos(#theta) of angle between gamma-ray and beam axis;Energy [keV];cos(#theta_#gamma)";
-		aE_vs_costhetagamma = new TH2F( hname.data(), htitle.data(), GBIN, GMIN, GMAX, 100, -1.0, 1.0 );
-		histlist->Add(aE_vs_costhetagamma);
 
 		hname = "aE_prompt_1p";
 		htitle = "Gamma-ray energy with addback in prompt coincide with just 1 particle;Energy [keV];Counts per 0.5 keV";
