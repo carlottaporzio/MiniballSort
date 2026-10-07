@@ -137,6 +137,12 @@ void MiniballHistogrammer::MakeHists() {
 		gamma_gamma_td_random = new TH1F( hname.data(), htitle.data(),
 								TBIN, TMIN, TMAX );
 		histlist->Add(gamma_gamma_td_random);
+
+		hname = "particle_gamma_gamma_td";
+		htitle = "Particle - Gamma-ray vs Gamma-ray - Gamma-ray time difference;#Deltat (#gamma-#gamma) [ns];#Deltat (p-#gamma) [ns]";
+		particle_gamma_gamma_td = new TH2F( hname.data(), htitle.data(),
+								TBIN, TMIN, TMAX, TBIN, TMIN, TMAX );
+		histlist->Add(particle_gamma_gamma_td);
 	}
 
 	if ( react->HistElectronGamma() ) {
@@ -3188,6 +3194,17 @@ unsigned long MiniballHistogrammer::FillHists() {
 					} // by sector
 
 				} // if prompt
+
+				// Loop over other gamma events
+				for( unsigned int l = k+1; l < read_evts->GetGammaRayMultiplicity(); ++l ){
+
+					// Get gamma-ray event
+					gamma_evt2 = read_evts->GetGammaRayEvt(l);
+
+					// Time difference p-g and g-g (non-symmetrised)
+					particle_gamma_gamma_td->Fill( (double)gamma_evt2->GetTime() - (double)gamma_evt->GetTime(), (double)particle_evt->GetTime() - (double)gamma_evt->GetTime() );
+
+				} // l: second gamma loop
 
 			} // k: gammas
 

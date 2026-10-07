@@ -344,6 +344,7 @@ private:
 
 	// Gamma-ray coincidence matrices with and without addback
 	TH1F *gamma_gamma_td = nullptr, *gamma_gamma_td_prompt = nullptr, *gamma_gamma_td_random = nullptr;
+	TH2F *particle_gamma_gamma_td = nullptr;
 	TH2F *gE_gE = nullptr, *gE_gE_ebis_on = nullptr;
 	TH2F *aE_aE = nullptr, *aE_aE_ebis_on = nullptr;
 
