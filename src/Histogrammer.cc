@@ -2853,15 +2853,29 @@ void MiniballHistogrammer::FillParticleElectronHists( std::shared_ptr<SpedeEvt> 
 // Particle-Gamma-Gamma coincidences without addback
 void MiniballHistogrammer::FillParticleGammaGammaHists( std::shared_ptr<GammaRayEvt> g1, std::shared_ptr<GammaRayEvt> g2 ) {
 
-	// Work out the weight if it's prompt or random
 	float weight;
-	if( PromptCoincidence( g1, react->GetParticleTime() ) ) {
-		weight = 1.0;
+	
+	// Check for particle of interest in the event 
+	if( react->IsEjectileDetected() || react->IsRecoilDetected() || react->IsTransferDetected() ) {
+
+		// Work out the weight if it's prompt or random
+		if( PromptCoincidence( g1, react->GetParticleTime() ) && PromptCoincidence( g1, g2 ) ) { 
+			weight = 1.0;
+		}
+		else if( RandomCoincidence( g1, react->GetParticleTime() ) && PromptCoincidence( g1, g2 ) ){
+			weight = -1.0 * react->GetParticleGammaFillRatio() * react->GetGammaGammaFillRatio();
+		}
+		else if( PromptCoincidence( g1, react->GetParticleTime() ) && RandomCoincidence( g1, g2 ) ){
+			weight = -1.0 * react->GetParticleGammaFillRatio() * react->GetGammaGammaFillRatio();
+		}
+		else if( RandomCoincidence( g1, react->GetParticleTime() ) && RandomCoincidence( g1, g2 ) ){
+			weight = 1.0 * react->GetParticleGammaFillRatio() * react->GetGammaGammaFillRatio();
+		}
+		else return; // outside of either window, quit now
+
 	}
-	else if( RandomCoincidence( g1, react->GetParticleTime() ) ){
-		weight = -1.0 * react->GetParticleGammaFillRatio();
-	}
-	else return; // outside of either window, quit now
+	else return; // no particle of interest in the event, quit now
+
 
 	// Get the energy from the core or the segment as the user requests
 	double gamma_energy1 = g1->GetEnergy();
@@ -3459,7 +3473,10 @@ unsigned long MiniballHistogrammer::FillHists() {
 				FillParticleGammaHists( gamma_evt );
 
 				// Loop over other gamma events
-				for( unsigned int k = j+1; k < read_evts->GetGammaRayMultiplicity(); ++k ){
+				for( unsigned int k = 0; k < read_evts->GetGammaRayMultiplicity(); ++k ){
+
+					if( k == j )
+						continue;
 
 					// Get gamma-ray event
 					gamma_evt2 = read_evts->GetGammaRayEvt(k);
@@ -3469,21 +3486,14 @@ unsigned long MiniballHistogrammer::FillHists() {
 					if( react->EventsGammaSegmentEnergy() )
 						gamma_energy2 = gamma_evt2->GetSegmentSumEnergy();
 
-					// Time differences - symmetrise
+					// Time differences - symmetrised thanks to the two for loops over all j and k values (with k != j)
 					gamma_gamma_td->Fill( (double)gamma_evt->GetTime() - (double)gamma_evt2->GetTime() );
-					gamma_gamma_td->Fill( (double)gamma_evt2->GetTime() - (double)gamma_evt->GetTime() );
 					
 					if( PromptCoincidence( gamma_evt, gamma_evt2 ) ) {
 						gamma_gamma_td_prompt->Fill( (double)gamma_evt->GetTime() - (double)gamma_evt2->GetTime() );
 					} // if prompt
 					else if( RandomCoincidence( gamma_evt, gamma_evt2 ) ) {
 						gamma_gamma_td_random->Fill( (double)gamma_evt->GetTime() - (double)gamma_evt2->GetTime() );
-					} // if random
-					if( PromptCoincidence( gamma_evt2, gamma_evt ) ) {
-						gamma_gamma_td_prompt->Fill( (double)gamma_evt2->GetTime() - (double)gamma_evt->GetTime() );
-					} // if prompt
-					else if( RandomCoincidence( gamma_evt2, gamma_evt ) ) {
-						gamma_gamma_td_random->Fill( (double)gamma_evt2->GetTime() - (double)gamma_evt->GetTime() );
 					} // if random
 
 					// Particle-gamma-gamma coincidence spectra
@@ -3492,21 +3502,18 @@ unsigned long MiniballHistogrammer::FillHists() {
 						// Check for prompt gamma-gamma coincidences
 						if( PromptCoincidence( gamma_evt, gamma_evt2 ) ) {
 
-							// Fill and symmetrise
+							// Fill (matrix is filled symmetrically in energy given the two loops over all j and k values)
 							gE_gE->Fill( gamma_energy, gamma_energy2 );
-							gE_gE->Fill( gamma_energy2, gamma_energy );
 
 							// Apply EBIS condition
 							if( OnBeam( gamma_evt ) && OnBeam( gamma_evt2 ) ) {
 
 								// Fill and symmetrise
 								gE_gE_ebis_on->Fill( gamma_energy, gamma_energy2 );
-								gE_gE_ebis_on->Fill( gamma_energy2, gamma_energy );
 
 							} // On Beam
 
 							FillParticleGammaGammaHists( gamma_evt, gamma_evt2 );
-							FillParticleGammaGammaHists( gamma_evt2, gamma_evt );
 
 						} // if prompt
 
