@@ -139,10 +139,47 @@ void MiniballHistogrammer::MakeHists() {
 		histlist->Add(gamma_gamma_td_random);
 
 		hname = "particle_gamma_gamma_td";
-		htitle = "Particle - Gamma-ray vs Gamma-ray - Gamma-ray time difference;#Deltat (#gamma-#gamma) [ns];#Deltat (p-#gamma) [ns]";
+		htitle = "Particle - Gamma-ray vs Gamma-ray - Gamma-ray time difference;#Deltat (#gamma2-#gamma1) [ns];#Deltat (p-#gamma1) [ns]";
 		particle_gamma_gamma_td = new TH2F( hname.data(), htitle.data(),
 								TBIN, TMIN, TMAX, TBIN, TMIN, TMAX );
 		histlist->Add(particle_gamma_gamma_td);
+
+		hname = "particle_gamma_gamma_td2";
+		htitle = "Particle - Gamma-ray vs Gamma-ray - Gamma-ray time difference;#Deltat (#gamma2-#gamma1) [ns];#Deltat (p-#gamma2) [ns]";
+		particle_gamma_gamma_td2 = new TH2F( hname.data(), htitle.data(),
+								TBIN, TMIN, TMAX, TBIN, TMIN, TMAX );
+		histlist->Add(particle_gamma_gamma_td2);
+
+		hname = "particle_gamma_gamma_td_cube";
+		htitle = "Particle - Gamma-ray vs Gamma-ray - Gamma-ray time difference;#Deltat (#gamma2-#gamma1) [ns];#Deltat (p-#gamma1) [ns];#Deltat (p-#gamma2) [ns]";
+		particle_gamma_gamma_td_cube = new TH3F( hname.data(), htitle.data(),
+								TBIN, TMIN, TMAX, TBIN, TMIN, TMAX, TBIN, TMIN, TMAX);
+		histlist->Add(particle_gamma_gamma_td_cube);
+
+		hname = "particle_gamma_gamma_td_PGprompt";
+		htitle = "Particle - Gamma-ray vs Gamma-ray - Gamma-ray time difference;#Deltat (#gamma-#gamma) [ns];#Deltat (p-#gamma) [ns]";
+		particle_gamma_gamma_td_PGprompt = new TH2F( hname.data(), htitle.data(),
+								TBIN, TMIN, TMAX, TBIN, TMIN, TMAX );
+		histlist->Add(particle_gamma_gamma_td_PGprompt);
+
+		hname = "particle_gamma_gamma_td_PGrandom";
+		htitle = "Particle - Gamma-ray vs Gamma-ray - Gamma-ray time difference;#Deltat (#gamma-#gamma) [ns];#Deltat (p-#gamma) [ns]";
+		particle_gamma_gamma_td_PGrandom = new TH2F( hname.data(), htitle.data(),
+								TBIN, TMIN, TMAX, TBIN, TMIN, TMAX );
+		histlist->Add(particle_gamma_gamma_td_PGrandom);
+
+		hname = "particle_gamma_gamma_td_GGprompt";
+		htitle = "Particle - Gamma-ray vs Gamma-ray - Gamma-ray time difference;#Deltat (#gamma-#gamma) [ns];#Deltat (p-#gamma) [ns]";
+		particle_gamma_gamma_td_GGprompt = new TH2F( hname.data(), htitle.data(),
+								TBIN, TMIN, TMAX, TBIN, TMIN, TMAX );
+		histlist->Add(particle_gamma_gamma_td_GGprompt);
+
+		hname = "particle_gamma_gamma_td_GGrandom";
+		htitle = "Particle - Gamma-ray vs Gamma-ray - Gamma-ray time difference;#Deltat (#gamma-#gamma) [ns];#Deltat (p-#gamma) [ns]";
+		particle_gamma_gamma_td_GGrandom = new TH2F( hname.data(), htitle.data(),
+								TBIN, TMIN, TMAX, TBIN, TMIN, TMAX );
+		histlist->Add(particle_gamma_gamma_td_GGrandom);
+
 	}
 
 	if ( react->HistElectronGamma() ) {
@@ -3196,13 +3233,35 @@ unsigned long MiniballHistogrammer::FillHists() {
 				} // if prompt
 
 				// Loop over other gamma events
-				for( unsigned int l = k+1; l < read_evts->GetGammaRayMultiplicity(); ++l ){
+				//for( unsigned int l = k+1; l < read_evts->GetGammaRayMultiplicity(); ++l ){
+				for( unsigned int l = 0; l < read_evts->GetGammaRayMultiplicity(); ++l ){
+
+					if( l == k ) 
+						continue;
 
 					// Get gamma-ray event
 					gamma_evt2 = read_evts->GetGammaRayEvt(l);
 
 					// Time difference p-g and g-g (non-symmetrised)
 					particle_gamma_gamma_td->Fill( (double)gamma_evt2->GetTime() - (double)gamma_evt->GetTime(), (double)particle_evt->GetTime() - (double)gamma_evt->GetTime() );
+					particle_gamma_gamma_td2->Fill( (double)gamma_evt2->GetTime() - (double)gamma_evt->GetTime(), (double)particle_evt->GetTime() - (double)gamma_evt2->GetTime() );
+
+					// Time difference p-g and g-g (non-symmetrised)
+					particle_gamma_gamma_td_cube->Fill( (double)gamma_evt2->GetTime() - (double)gamma_evt->GetTime(), (double)particle_evt->GetTime() - (double)gamma_evt->GetTime(), (double)particle_evt->GetTime() - (double)gamma_evt2->GetTime() );
+
+					if( PromptCoincidence( gamma_evt, particle_evt ) ){
+						particle_gamma_gamma_td_PGprompt->Fill((double)gamma_evt2->GetTime() - (double)gamma_evt->GetTime(), (double)particle_evt->GetTime() - (double)gamma_evt->GetTime() );
+					} // if prompt
+					else if ( RandomCoincidence( gamma_evt, particle_evt ) ){
+						particle_gamma_gamma_td_PGrandom->Fill( (double)gamma_evt2->GetTime() - (double)gamma_evt->GetTime(), (double)particle_evt->GetTime() - (double)gamma_evt->GetTime() );
+					} // if random
+
+					if( PromptCoincidence( gamma_evt, gamma_evt2 ) ){
+						particle_gamma_gamma_td_GGprompt->Fill((double)gamma_evt2->GetTime() - (double)gamma_evt->GetTime(), (double)particle_evt->GetTime() - (double)gamma_evt->GetTime() );
+					} // if prompt
+					else if ( RandomCoincidence( gamma_evt, gamma_evt2 ) ){
+						particle_gamma_gamma_td_GGrandom->Fill( (double)gamma_evt2->GetTime() - (double)gamma_evt->GetTime(), (double)particle_evt->GetTime() - (double)gamma_evt->GetTime() );
+					} // if random
 
 				} // l: second gamma loop
 

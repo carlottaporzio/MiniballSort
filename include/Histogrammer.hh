@@ -16,6 +16,7 @@
 #include <TProfile.h>
 #include <TH1.h>
 #include <TH2.h>
+#include <TH3.h>
 #include <TCutG.h>
 #include <TGProgressBar.h>
 #include <TSystem.h>
@@ -345,6 +346,10 @@ private:
 	// Gamma-ray coincidence matrices with and without addback
 	TH1F *gamma_gamma_td = nullptr, *gamma_gamma_td_prompt = nullptr, *gamma_gamma_td_random = nullptr;
 	TH2F *particle_gamma_gamma_td = nullptr;
+	TH2F *particle_gamma_gamma_td2 = nullptr;
+	TH3F *particle_gamma_gamma_td_cube = nullptr;
+	TH2F *particle_gamma_gamma_td_PGprompt = nullptr, *particle_gamma_gamma_td_PGrandom = nullptr;
+	TH2F *particle_gamma_gamma_td_GGprompt = nullptr, *particle_gamma_gamma_td_GGrandom = nullptr;
 	TH2F *gE_gE = nullptr, *gE_gE_ebis_on = nullptr;
 	TH2F *aE_aE = nullptr, *aE_aE_ebis_on = nullptr;
 
