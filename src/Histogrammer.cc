@@ -2858,20 +2858,28 @@ void MiniballHistogrammer::FillParticleGammaGammaHists( std::shared_ptr<GammaRay
 	// Check for particle of interest in the event 
 	if( react->IsEjectileDetected() || react->IsRecoilDetected() || react->IsTransferDetected() ) {
 
-		// Work out the weight if it's prompt or random
-		if( PromptCoincidence( g1, react->GetParticleTime() ) && PromptCoincidence( g1, g2 ) ) { 
-			weight = 1.0;
+		// Check that all particle-gamma combinations are either in a prompt or random coincidence window
+		if( ( PromptCoincidence( g1, react->GetParticleTime() ) || RandomCoincidence( g1, react->GetParticleTime() )  ) &&
+			( PromptCoincidence( g2, react->GetParticleTime() ) || RandomCoincidence( g2, react->GetParticleTime() )  ) &&
+			( PromptCoincidence( g1, g2 ) || RandomCoincidence( g1, g2 )  ) ) {
+
+			// Work out the weight if it's prompt or random
+			if( PromptCoincidence( g1, react->GetParticleTime() ) && PromptCoincidence( g1, g2 ) ) { 
+				weight = 1.0;
+			}
+			else if( RandomCoincidence( g1, react->GetParticleTime() ) && PromptCoincidence( g1, g2 ) ){
+				weight = -1.0 * react->GetParticleGammaFillRatio() * react->GetGammaGammaFillRatio();
+			}
+			else if( PromptCoincidence( g1, react->GetParticleTime() ) && RandomCoincidence( g1, g2 ) ){
+				weight = -1.0 * react->GetParticleGammaFillRatio() * react->GetGammaGammaFillRatio();
+			}
+			else if( RandomCoincidence( g1, react->GetParticleTime() ) && RandomCoincidence( g1, g2 ) ){
+				weight = 1.0 * react->GetParticleGammaFillRatio() * react->GetGammaGammaFillRatio();
+			}
+			else return; // outside of either window, quit now
+
 		}
-		else if( RandomCoincidence( g1, react->GetParticleTime() ) && PromptCoincidence( g1, g2 ) ){
-			weight = -1.0 * react->GetParticleGammaFillRatio() * react->GetGammaGammaFillRatio();
-		}
-		else if( PromptCoincidence( g1, react->GetParticleTime() ) && RandomCoincidence( g1, g2 ) ){
-			weight = -1.0 * react->GetParticleGammaFillRatio() * react->GetGammaGammaFillRatio();
-		}
-		else if( RandomCoincidence( g1, react->GetParticleTime() ) && RandomCoincidence( g1, g2 ) ){
-			weight = 1.0 * react->GetParticleGammaFillRatio() * react->GetGammaGammaFillRatio();
-		}
-		else return; // outside of either window, quit now
+		else return; // one among the particle and gamma events is outside of windows, quit now
 
 	}
 	else return; // no particle of interest in the event, quit now
