@@ -3481,10 +3481,7 @@ unsigned long MiniballHistogrammer::FillHists() {
 				FillParticleGammaHists( gamma_evt );
 
 				// Loop over other gamma events
-				for( unsigned int k = 0; k < read_evts->GetGammaRayMultiplicity(); ++k ){
-
-					if( k == j )
-						continue;
+				for( unsigned int k = j+1; k < read_evts->GetGammaRayMultiplicity(); ++k ){
 
 					// Get gamma-ray event
 					gamma_evt2 = read_evts->GetGammaRayEvt(k);
@@ -3494,13 +3491,20 @@ unsigned long MiniballHistogrammer::FillHists() {
 					if( react->EventsGammaSegmentEnergy() )
 						gamma_energy2 = gamma_evt2->GetSegmentSumEnergy();
 
-					// Time differences - symmetrised thanks to the two for loops over all j and k values (with k != j)
+					// Time differences - symmetrise
+					gamma_gamma_td->Fill( (double)gamma_evt2->GetTime() - (double)gamma_evt->GetTime() );
 					gamma_gamma_td->Fill( (double)gamma_evt->GetTime() - (double)gamma_evt2->GetTime() );
 					
 					if( PromptCoincidence( gamma_evt, gamma_evt2 ) ) {
-						gamma_gamma_td_prompt->Fill( (double)gamma_evt->GetTime() - (double)gamma_evt2->GetTime() );
+						gamma_gamma_td_prompt->Fill( (double)gamma_evt2->GetTime() - (double)gamma_evt->GetTime() );
 					} // if prompt
 					else if( RandomCoincidence( gamma_evt, gamma_evt2 ) ) {
+						gamma_gamma_td_random->Fill( (double)gamma_evt2->GetTime() - (double)gamma_evt->GetTime() );
+					} // if random
+					if( PromptCoincidence( gamma_evt2, gamma_evt ) ) {
+						gamma_gamma_td_prompt->Fill( (double)gamma_evt->GetTime() - (double)gamma_evt2->GetTime() );
+					} // if prompt
+					else if( RandomCoincidence( gamma_evt2, gamma_evt ) ) {
 						gamma_gamma_td_random->Fill( (double)gamma_evt->GetTime() - (double)gamma_evt2->GetTime() );
 					} // if random
 
@@ -3510,20 +3514,41 @@ unsigned long MiniballHistogrammer::FillHists() {
 						// Check for prompt gamma-gamma coincidences
 						if( PromptCoincidence( gamma_evt, gamma_evt2 ) ) {
 
-							// Fill (matrix is filled symmetrically in energy given the two loops over all j and k values)
+							// Fill and symmetrise
 							gE_gE->Fill( gamma_energy, gamma_energy2 );
+							gE_gE->Fill( gamma_energy2, gamma_energy );
 
 							// Apply EBIS condition
 							if( OnBeam( gamma_evt ) && OnBeam( gamma_evt2 ) ) {
 
 								// Fill and symmetrise
 								gE_gE_ebis_on->Fill( gamma_energy, gamma_energy2 );
+								gE_gE_ebis_on->Fill( gamma_energy2, gamma_energy );
 
 							} // On Beam
 
-							FillParticleGammaGammaHists( gamma_evt, gamma_evt2 );
-
 						} // if prompt
+						else if( RandomCoincidence( gamma_evt, gamma_evt2 ) || RandomCoincidence( gamma_evt2, gamma_evt ) ) {
+							
+							// Fill and symmetrise
+							// Random background is weighted by half (0.5*) of the time random window ratio, as the prompt window goes both in
+							// positive/negative times, while the random window is defined only on one side
+							gE_gE->Fill( gamma_energy, gamma_energy2, -0.5 * react->GetGammaGammaFillRatio() );
+							gE_gE->Fill( gamma_energy2, gamma_energy, -0.5 * react->GetGammaGammaFillRatio() );
+
+							// Apply EBIS condition
+							if( OnBeam( gamma_evt ) && OnBeam( gamma_evt2 ) ) {
+
+								// Fill and symmetrise
+								gE_gE_ebis_on->Fill( gamma_energy, gamma_energy2, -0.5 * react->GetGammaGammaFillRatio() );
+								gE_gE_ebis_on->Fill( gamma_energy2, gamma_energy, -0.5 * react->GetGammaGammaFillRatio() );
+
+							} // On Beam
+
+						} // if random
+
+						FillParticleGammaGammaHists( gamma_evt, gamma_evt2 );
+						FillParticleGammaGammaHists( gamma_evt2, gamma_evt );
 
 					} // gamma-gamma user option on
 
