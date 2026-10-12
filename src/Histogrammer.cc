@@ -2853,67 +2853,59 @@ void MiniballHistogrammer::FillParticleElectronHists( std::shared_ptr<SpedeEvt> 
 // Particle-Gamma-Gamma coincidences without addback
 void MiniballHistogrammer::FillParticleGammaGammaHists( std::shared_ptr<GammaRayEvt> g1, std::shared_ptr<GammaRayEvt> g2 ) {
 
-	float weight;
-	
-	// Check for particle of interest in the event 
-	if( react->IsEjectileDetected() || react->IsRecoilDetected() || react->IsTransferDetected() ) {
+    // Work out the weight if it's prompt or random
+    float weight;
+    bool bg = true;
+    if( PromptCoincidence( g1, react->GetParticleTime() ) && PromptCoincidence( g1, g2 ) ){
+        weight = 1.0;
+        bg = false;
+    }
+    else if( RandomCoincidence( g1, react->GetParticleTime() ) && PromptCoincidence( g1, g2 ) ){
+        weight = -1.0 * react->GetParticleGammaFillRatio();
+    }
+    else if( PromptCoincidence( g1, react->GetParticleTime() ) && RandomCoincidence( g1, g2 ) ){
+        weight = -1.0 * react->GetGammaGammaFillRatio();
+    }
+    else if( RandomCoincidence( g1, react->GetParticleTime() ) && RandomCoincidence( g1, g2 ) ){
+        weight = 1.0 * react->GetParticleGammaFillRatio() * react->GetGammaGammaFillRatio();
+    }
+    else return; // outside of either window, quit now
 
-		// Check that all particle-gamma combinations are either in a prompt or random coincidence window
-		if( ( PromptCoincidence( g1, react->GetParticleTime() ) || RandomCoincidence( g1, react->GetParticleTime() )  ) &&
-			( PromptCoincidence( g2, react->GetParticleTime() ) || RandomCoincidence( g2, react->GetParticleTime() )  ) &&
-			( PromptCoincidence( g1, g2 ) || RandomCoincidence( g1, g2 )  ) ) {
+    // Get the energy from the core or the segment as the user requests
+    double gamma_energy1 = g1->GetEnergy();
+    double gamma_energy2 = g2->GetEnergy();
+    if( react->EventsGammaSegmentEnergy() ) {
+        gamma_energy1 = g1->GetSegmentSumEnergy();
+        gamma_energy2 = g2->GetSegmentSumEnergy();
+    }
 
-			// Work out the weight if it's prompt or random
-			if( PromptCoincidence( g1, react->GetParticleTime() ) && PromptCoincidence( g1, g2 ) ) { 
-				weight = 1.0;
-			}
-			else if( RandomCoincidence( g1, react->GetParticleTime() ) && PromptCoincidence( g1, g2 ) ){
-				weight = -1.0 * react->GetParticleGammaFillRatio() * react->GetGammaGammaFillRatio();
-			}
-			else if( PromptCoincidence( g1, react->GetParticleTime() ) && RandomCoincidence( g1, g2 ) ){
-				weight = -1.0 * react->GetParticleGammaFillRatio() * react->GetGammaGammaFillRatio();
-			}
-			else if( RandomCoincidence( g1, react->GetParticleTime() ) && RandomCoincidence( g1, g2 ) ){
-				weight = 1.0 * react->GetParticleGammaFillRatio() * react->GetGammaGammaFillRatio();
-			}
-			else return; // outside of either window, quit now
+    // Ejectile-gated spectra
+    if( react->IsEjectileDetected() ) {
 
-		}
-		else return; // one among the particle and gamma events is outside of windows, quit now
+        // Gamma-gamma
+        ggE_ejectile_dc_none->Fill( gamma_energy1, gamma_energy2, weight );
+        if( bg ) ggE_ejectile_dc_none->Fill( gamma_energy2, gamma_energy1, weight );
+        ggE_ejectile_dc_ejectile->Fill( react->DopplerCorrection( g1, true ), react->DopplerCorrection( g2, true ), weight );
+        if( bg ) ggE_ejectile_dc_ejectile->Fill( react->DopplerCorrection( g2, true ), react->DopplerCorrection( g1, true ), weight );
+        ggE_ejectile_dc_recoil->Fill( react->DopplerCorrection( g1, false ), react->DopplerCorrection( g2, false ), weight );
+        if( bg ) ggE_ejectile_dc_recoil->Fill( react->DopplerCorrection( g2, false ), react->DopplerCorrection( g1, false ), weight );
 
-	}
-	else return; // no particle of interest in the event, quit now
+    }
 
+    // Recoil-gated spectra
+    if( react->IsRecoilDetected() || react->IsTransferDetected() ) {
 
-	// Get the energy from the core or the segment as the user requests
-	double gamma_energy1 = g1->GetEnergy();
-	double gamma_energy2 = g2->GetEnergy();
-	if( react->EventsGammaSegmentEnergy() ) {
-		gamma_energy1 = g1->GetSegmentSumEnergy();
-		gamma_energy2 = g2->GetSegmentSumEnergy();
-	}
+        // Gamma-gamma
+        ggE_recoil_dc_none->Fill( gamma_energy1, gamma_energy2, weight );
+        if( bg ) ggE_recoil_dc_none->Fill( gamma_energy2, gamma_energy1, weight );
+        ggE_recoil_dc_ejectile->Fill( react->DopplerCorrection( g1, true ), react->DopplerCorrection( g2, true ), weight );
+        if( bg ) ggE_recoil_dc_ejectile->Fill( react->DopplerCorrection( g2, true ), react->DopplerCorrection( g1, true ), weight );
+        ggE_recoil_dc_recoil->Fill( react->DopplerCorrection( g1, false ), react->DopplerCorrection( g2, false ), weight );
+        if( bg ) ggE_recoil_dc_recoil->Fill( react->DopplerCorrection( g2, false ), react->DopplerCorrection( g1, false ), weight );
 
-	// Ejectile-gated spectra
-	if( react->IsEjectileDetected() ) {
+    }
 
-		// Gamma-gamma
-		ggE_ejectile_dc_none->Fill( gamma_energy1, gamma_energy2, weight );
-		ggE_ejectile_dc_ejectile->Fill( react->DopplerCorrection( g1, true ), react->DopplerCorrection( g2, true ), weight );
-		ggE_ejectile_dc_recoil->Fill( react->DopplerCorrection( g1, false ), react->DopplerCorrection( g2, false ), weight );
-
-	}
-
-	// Recoil-gated spectra
-	if( react->IsRecoilDetected() || react->IsTransferDetected() ) {
-
-		// Gamma-gamma
-		ggE_recoil_dc_none->Fill( gamma_energy1, gamma_energy2, weight );
-		ggE_recoil_dc_ejectile->Fill( react->DopplerCorrection( g1, true ), react->DopplerCorrection( g2, true ), weight );
-		ggE_recoil_dc_recoil->Fill( react->DopplerCorrection( g1, false ), react->DopplerCorrection( g2, false ), weight );
-
-	}
-
-	return;
+    return;
 
 }
 
@@ -3547,6 +3539,8 @@ unsigned long MiniballHistogrammer::FillHists() {
 
 						} // if random
 
+						if( !react->IsEjectileDetected() && !react->IsRecoilDetected() && !react->IsTransferDetected() ) continue;
+
 						FillParticleGammaGammaHists( gamma_evt, gamma_evt2 );
 						FillParticleGammaGammaHists( gamma_evt2, gamma_evt );
 
@@ -3640,12 +3634,31 @@ unsigned long MiniballHistogrammer::FillHists() {
 								aE_aE_ebis_on->Fill( gamma_energy2, gamma_energy );
 
 							} // On Beam
-
-							// Particle-gamma-gamma coincidence spectra
-							FillParticleGammaGammaHists( gamma_ab_evt, gamma_ab_evt2 );
-							FillParticleGammaGammaHists( gamma_ab_evt2, gamma_ab_evt );
-
 						} // if prompt
+						else if( RandomCoincidence( gamma_ab_evt, gamma_ab_evt2 ) || RandomCoincidence( gamma_ab_evt2, gamma_ab_evt ) ) {
+
+							// Fill and symmetrise
+							// Random background is weighted by half (0.5*) of the time random window ratio, as the prompt window goes both in
+							// positive/negative times, while the random window is defined only on one side
+							aE_aE->Fill( gamma_energy, gamma_energy2, -0.5 * react->GetGammaGammaFillRatio() );
+							aE_aE->Fill( gamma_energy2, gamma_energy, -0.5 * react->GetGammaGammaFillRatio() );
+
+							// Apply EBIS condition
+							if( OnBeam( gamma_ab_evt ) && OnBeam( gamma_ab_evt2 ) ) {
+
+								// Fill and symmetrise
+								aE_aE_ebis_on->Fill( gamma_energy, gamma_energy2, -0.5 * react->GetGammaGammaFillRatio() );
+								aE_aE_ebis_on->Fill( gamma_energy2, gamma_energy, -0.5 * react->GetGammaGammaFillRatio() );
+
+							} // On Beam
+						} // if random
+
+						if( !react->IsEjectileDetected() && !react->IsRecoilDetected() && !react->IsTransferDetected() ) continue;
+
+						// Particle-gamma-gamma coincidence spectra
+						FillParticleGammaGammaHists( gamma_ab_evt, gamma_ab_evt2 );
+						FillParticleGammaGammaHists( gamma_ab_evt2, gamma_ab_evt );
+
 
 					} // k: second gamma-ray
 
