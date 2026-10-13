@@ -347,7 +347,8 @@ private:
 	TH1F *gamma_gamma_td = nullptr, *gamma_gamma_td_prompt = nullptr, *gamma_gamma_td_random = nullptr;
 	TH2F *particle_gamma_gamma_td = nullptr;
 	TH2F *particle_gamma_gamma_td2 = nullptr;
-	TH3F *particle_gamma_gamma_td_cube = nullptr;
+	//TH3F *particle_gamma_gamma_td_cube = nullptr;
+	TH2F *pe_pg_td = nullptr, *pe_ge_td = nullptr, *pg_ge_td = nullptr;	
 	TH2F *particle_gamma_gamma_td_PGprompt = nullptr, *particle_gamma_gamma_td_PGrandom = nullptr;
 	TH2F *particle_gamma_gamma_td_GGprompt = nullptr, *particle_gamma_gamma_td_GGrandom = nullptr;
 	TH2F *gE_gE = nullptr, *gE_gE_ebis_on = nullptr;

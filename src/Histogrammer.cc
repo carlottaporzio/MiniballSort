@@ -150,11 +150,29 @@ void MiniballHistogrammer::MakeHists() {
 								TBIN, TMIN, TMAX, TBIN, TMIN, TMAX );
 		histlist->Add(particle_gamma_gamma_td2);
 
-		hname = "particle_gamma_gamma_td_cube";
-		htitle = "Particle - Gamma-ray vs Gamma-ray - Gamma-ray time difference;#Deltat (#gamma2-#gamma1) [ns];#Deltat (p-#gamma1) [ns];#Deltat (p-#gamma2) [ns]";
-		particle_gamma_gamma_td_cube = new TH3F( hname.data(), htitle.data(),
-								TBIN, TMIN, TMAX, TBIN, TMIN, TMAX, TBIN, TMIN, TMAX);
-		histlist->Add(particle_gamma_gamma_td_cube);
+		//hname = "particle_gamma_gamma_td_cube";
+		//htitle = "Particle - Gamma-ray vs Gamma-ray - Gamma-ray time difference;#Deltat (#gamma2-#gamma1) [ns];#Deltat (p-#gamma1) [ns];#Deltat (p-#gamma2) [ns]";
+		//particle_gamma_gamma_td_cube = new TH3F( hname.data(), htitle.data(),
+		//						TBIN, TMIN, TMAX, TBIN, TMIN, TMAX, TBIN, TMIN, TMAX);
+		//histlist->Add(particle_gamma_gamma_td_cube);
+
+		hname = "pe_pg_td";
+		htitle = "Particle - Gamma-ray vs Particle - Electron time difference;#Deltat (p-e) [ns];#Deltat (p-#gamma) [ns]";
+		pe_pg_td = new TH2F( hname.data(), htitle.data(),
+								TBIN, TMIN, TMAX, TBIN, TMIN, TMAX );
+		histlist->Add(pe_pg_td);
+
+		hname = "pe_ge_td";
+		htitle = "Gamma-ray - Electron vs Particle - Electron time difference;#Deltat (p-e) [ns];#Deltat (#gamma-e) [ns]";
+		pe_ge_td = new TH2F( hname.data(), htitle.data(),
+								TBIN, TMIN, TMAX, TBIN, TMIN, TMAX );
+		histlist->Add(pe_ge_td);
+
+		hname = "pg_ge_td";
+		htitle = "Particle - Gamma-ray vs Particle - Electron time difference;#Deltat (p-#gamma) [ns];#Deltat (#gamma-e) [ns]";
+		pg_ge_td = new TH2F( hname.data(), htitle.data(),
+								TBIN, TMIN, TMAX, TBIN, TMIN, TMAX );
+		histlist->Add(pg_ge_td);
 
 		hname = "particle_gamma_gamma_td_PGprompt";
 		htitle = "Particle - Gamma-ray vs Gamma-ray - Gamma-ray time difference;#Deltat (#gamma-#gamma) [ns];#Deltat (p-#gamma) [ns]";
@@ -3247,7 +3265,7 @@ unsigned long MiniballHistogrammer::FillHists() {
 					particle_gamma_gamma_td2->Fill( (double)gamma_evt2->GetTime() - (double)gamma_evt->GetTime(), (double)particle_evt->GetTime() - (double)gamma_evt2->GetTime() );
 
 					// Time difference p-g and g-g (non-symmetrised)
-					particle_gamma_gamma_td_cube->Fill( (double)gamma_evt2->GetTime() - (double)gamma_evt->GetTime(), (double)particle_evt->GetTime() - (double)gamma_evt->GetTime(), (double)particle_evt->GetTime() - (double)gamma_evt2->GetTime() );
+					//particle_gamma_gamma_td_cube->Fill( (double)gamma_evt2->GetTime() - (double)gamma_evt->GetTime(), (double)particle_evt->GetTime() - (double)gamma_evt->GetTime(), (double)particle_evt->GetTime() - (double)gamma_evt2->GetTime() );
 
 					if( PromptCoincidence( gamma_evt, particle_evt ) ){
 						particle_gamma_gamma_td_PGprompt->Fill((double)gamma_evt2->GetTime() - (double)gamma_evt->GetTime(), (double)particle_evt->GetTime() - (double)gamma_evt->GetTime() );
@@ -3276,6 +3294,11 @@ unsigned long MiniballHistogrammer::FillHists() {
 				// Time differences
 				electron_particle_td->Fill( (double)particle_evt->GetTime() - (double)spede_evt->GetTime() );
 				
+				// Time difference p-e, p-g and g-e
+				pe_pg_td->Fill( (double)particle_evt->GetTime() - (double)spede_evt->GetTime(), (double)particle_evt->GetTime() - (double)gamma_evt->GetTime() );
+				pe_ge_td->Fill( (double)particle_evt->GetTime() - (double)spede_evt->GetTime(), (double)gamma_evt->GetTime() - (double)spede_evt->GetTime() );
+				pg_ge_td->Fill( (double)particle_evt->GetTime() - (double)gamma_evt->GetTime(), (double)gamma_evt->GetTime() - (double)spede_evt->GetTime() );
+
 				if( PromptCoincidence( spede_evt, particle_evt ) ){
 					electron_particle_td_prompt->Fill( (double)particle_evt->GetTime() - (double)spede_evt->GetTime() );					
 				} // if prompt
