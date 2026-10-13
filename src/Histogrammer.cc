@@ -2913,45 +2913,60 @@ void MiniballHistogrammer::FillParticleGammaGammaHists( std::shared_ptr<GammaRay
 // Particle-Gamma-Gamma coincidences with addback
 void MiniballHistogrammer::FillParticleGammaGammaHists( std::shared_ptr<GammaRayAddbackEvt> g1, std::shared_ptr<GammaRayAddbackEvt> g2 ) {
 
-	// Work out the weight if it's prompt or random
-	float weight;
-	if( PromptCoincidence( g1, react->GetParticleTime() ) ) {
-		weight = 1.0;
-	}
-	else if( RandomCoincidence( g1, react->GetParticleTime() ) ){
-		weight = -1.0 * react->GetParticleGammaFillRatio();
-	}
-	else return; // outside of either window, quit now
+    // Work out the weight if it's prompt or random
+    float weight;
+    bool bg = true;
+    if( PromptCoincidence( g1, react->GetParticleTime() ) && PromptCoincidence( g2, react->GetParticleTime() ) && PromptCoincidence( g1, g2 ) ){
+        weight = 1.0;
+        bg = false;
+    }
+    else if( RandomCoincidence( g1, react->GetParticleTime() ) && RandomCoincidence( g2, react->GetParticleTime() ) && PromptCoincidence( g1, g2 ) ){
+        weight = -1.0 * react->GetParticleGammaFillRatio();
+	bg = false;
+    }
+    else if( PromptCoincidence( g1, react->GetParticleTime() ) && RandomCoincidence( g1, g2 ) ){
+        weight = -1.0 * react->GetGammaGammaFillRatio();
+    }
+    else if( RandomCoincidence( g1, react->GetParticleTime() ) && RandomCoincidence( g1, g2 ) ){
+        weight = 1.0 * react->GetParticleGammaFillRatio() * react->GetGammaGammaFillRatio();
+    }
+    else return; // outside of either window, quit now
 
-	// Get the energy from the core or the segment as the user requests
-	double gamma_energy1 = g1->GetEnergy();
-	double gamma_energy2 = g2->GetEnergy();
-	if( react->EventsGammaSegmentEnergy() ) {
-		gamma_energy1 = g1->GetSegmentSumEnergy();
-		gamma_energy2 = g2->GetSegmentSumEnergy();
-	}
+    // Get the energy from the core or the segment as the user requests
+    double gamma_energy1 = g1->GetEnergy();
+    double gamma_energy2 = g2->GetEnergy();
+    if( react->EventsGammaSegmentEnergy() ) {
+    	gamma_energy1 = g1->GetSegmentSumEnergy();
+    	gamma_energy2 = g2->GetSegmentSumEnergy();
+    }
 
-	// Ejectile-gated spectra
-	if( react->IsEjectileDetected() ) {
-
-		// Gamma-gamma
-		aaE_ejectile_dc_none->Fill( gamma_energy1, gamma_energy2, weight );
-		aaE_ejectile_dc_ejectile->Fill( react->DopplerCorrection( g1, true ), react->DopplerCorrection( g2, true ), weight );
-		aaE_ejectile_dc_recoil->Fill( react->DopplerCorrection( g1, false ), react->DopplerCorrection( g2, false ), weight );
-
-	}
-
-	// Recoil-gated spectra
-	if( react->IsRecoilDetected() || react->IsTransferDetected() ) {
-
-		// Gamma-gamma
-		aaE_recoil_dc_none->Fill( gamma_energy1, gamma_energy2, weight );
-		aaE_recoil_dc_ejectile->Fill( react->DopplerCorrection( g1, true ), react->DopplerCorrection( g2, true ), weight );
-		aaE_recoil_dc_recoil->Fill( react->DopplerCorrection( g1, false ), react->DopplerCorrection( g2, false ), weight );
-
-	}
-
-	return;
+    // Ejectile-gated spectra
+    if( react->IsEjectileDetected() ) {
+    
+    	// Gamma-gamma
+    	aaE_ejectile_dc_none->Fill( gamma_energy1, gamma_energy2, weight );
+        if( bg ) aaE_ejectile_dc_none->Fill( gamma_energy2, gamma_energy1, weight );
+    	aaE_ejectile_dc_ejectile->Fill( react->DopplerCorrection( g1, true ), react->DopplerCorrection( g2, true ), weight );
+        if( bg ) aaE_ejectile_dc_ejectile->Fill( react->DopplerCorrection( g2, true ), react->DopplerCorrection( g1, true ), weight );
+    	aaE_ejectile_dc_recoil->Fill( react->DopplerCorrection( g1, false ), react->DopplerCorrection( g2, false ), weight );
+        if( bg ) aaE_ejectile_dc_recoil->Fill( react->DopplerCorrection( g2, false ), react->DopplerCorrection( g1, false ), weight );
+    
+    }
+    
+    // Recoil-gated spectra
+    if( react->IsRecoilDetected() || react->IsTransferDetected() ) {
+    
+    	// Gamma-gamma
+    	aaE_recoil_dc_none->Fill( gamma_energy1, gamma_energy2, weight );
+        if( bg ) aaE_recoil_dc_none->Fill( gamma_energy2, gamma_energy1, weight );
+    	aaE_recoil_dc_ejectile->Fill( react->DopplerCorrection( g1, true ), react->DopplerCorrection( g2, true ), weight );
+        if( bg ) aaE_recoil_dc_ejectile->Fill( react->DopplerCorrection( g2, true ), react->DopplerCorrection( g1, true ), weight );
+    	aaE_recoil_dc_recoil->Fill( react->DopplerCorrection( g1, false ), react->DopplerCorrection( g2, false ), weight );
+        if( bg ) aaE_recoil_dc_recoil->Fill( react->DopplerCorrection( g2, false ), react->DopplerCorrection( g1, false ), weight );
+    
+    }
+    
+    return;
 
 }
 
