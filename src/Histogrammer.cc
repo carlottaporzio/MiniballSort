@@ -2856,12 +2856,13 @@ void MiniballHistogrammer::FillParticleGammaGammaHists( std::shared_ptr<GammaRay
     // Work out the weight if it's prompt or random
     float weight;
     bool bg = true;
-    if( PromptCoincidence( g1, react->GetParticleTime() ) && PromptCoincidence( g1, g2 ) ){
+    if( PromptCoincidence( g1, react->GetParticleTime() ) && PromptCoincidence( g2, react->GetParticleTime() ) && PromptCoincidence( g1, g2 ) ){
         weight = 1.0;
         bg = false;
     }
-    else if( RandomCoincidence( g1, react->GetParticleTime() ) && PromptCoincidence( g1, g2 ) ){
+    else if( RandomCoincidence( g1, react->GetParticleTime() ) && RandomCoincidence( g2, react->GetParticleTime() ) && PromptCoincidence( g1, g2 ) ){
         weight = -1.0 * react->GetParticleGammaFillRatio();
+	bg = false;
     }
     else if( PromptCoincidence( g1, react->GetParticleTime() ) && RandomCoincidence( g1, g2 ) ){
         weight = -1.0 * react->GetGammaGammaFillRatio();
