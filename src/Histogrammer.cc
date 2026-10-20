@@ -329,12 +329,12 @@ void MiniballHistogrammer::MakeHists() {
 		if( react->HistWithoutAddback() ) {
 
 			hname = "gE_gE";
-			htitle = "Gamma-ray coincidence matrix;Energy [keV];Energy [keV];Counts per 0.5 keV";
+			htitle = "Gamma-ray coincidence matrix with random subtraction;Energy [keV];Energy [keV];Counts per 0.5 keV";
 			gE_gE = new TH2F( hname.data(), htitle.data(), GBIN, GMIN, GMAX, GBIN, GMIN, GMAX );
 			histlist->Add(gE_gE);
 
 			hname = "gE_gE_ebis_on";
-			htitle = "Gamma-ray coincidence matrix EBIS on;Energy [keV];Energy [keV];Counts per 0.5 keV";
+			htitle = "Gamma-ray coincidence matrix EBIS on with random subtraction;Energy [keV];Energy [keV];Counts per 0.5 keV";
 			gE_gE_ebis_on = new TH2F( hname.data(), htitle.data(), GBIN, GMIN, GMAX, GBIN, GMIN, GMAX );
 			histlist->Add(gE_gE_ebis_on);
 
@@ -343,12 +343,12 @@ void MiniballHistogrammer::MakeHists() {
 		if( react->HistWithAddback() ) {
 
 			hname = "aE_aE";
-			htitle = "Gamma-ray addback coincidence matrix;Energy [keV];Energy [keV];Counts per 0.5 keV";
+			htitle = "Gamma-ray addback coincidence matrix with random subtraction;Energy [keV];Energy [keV];Counts per 0.5 keV";
 			aE_aE = new TH2F( hname.data(), htitle.data(), GBIN, GMIN, GMAX, GBIN, GMIN, GMAX );
 			histlist->Add(aE_aE);
 
 			hname = "aE_aE_ebis_on";
-			htitle = "Gamma-ray addback coincidence matrix EBIS on;Energy [keV];Energy [keV];Counts per 0.5 keV";
+			htitle = "Gamma-ray addback coincidence matrix EBIS on with random subtraction;Energy [keV];Energy [keV];Counts per 0.5 keV";
 			aE_aE_ebis_on = new TH2F( hname.data(), htitle.data(), GBIN, GMIN, GMAX, GBIN, GMIN, GMAX );
 			histlist->Add(aE_aE_ebis_on);
 
